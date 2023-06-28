@@ -43,4 +43,10 @@ public class CompanyController {
         requestCounter.incrementCount();
         return service.replaceEmployeeById(newEmployee, id);
     }
+
+    @DeleteMapping("/{id}")
+    void deleteEmployeeById(@RequestBody Long id){
+        requestCounter.incrementCount();
+        service.deleteEmployeeById(id);
+    }
 }

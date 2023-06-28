@@ -31,8 +31,13 @@ public class CompanyService {
 
     public Employee replaceEmployeeById(Employee newEmployee, Long id) {
         return repository.findById(id).map(employee -> {
-            employee = newEmployee;
+            employee.setJob(newEmployee.getJob());
+            employee.setName(newEmployee.getName());
             return repository.save(employee);
         }).orElseGet(() -> repository.save(newEmployee));
+    }
+
+    public void deleteEmployeeById(Long id) {
+        repository.deleteById(id);
     }
 }
