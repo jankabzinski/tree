@@ -10,19 +10,29 @@ import java.util.List;
 
 @Service
 public class CompanyService {
-
-
-    private CompanyRepository repository;
+    private final CompanyRepository repository;
 
     @Autowired
     public CompanyService(CompanyRepository repository) {
         this.repository = repository;
     }
-    public List<Employee> getAllEmployees() {
 
+    public List<Employee> getAllEmployees() {
         return repository.findAll();
     }
-    public Employee getEmployeeById(long id){
+
+    public Employee getEmployeeById(long id) {
         return repository.findById(id).get();
+    }
+
+    public Employee addNewEmployee(Employee newEmployee) {
+        return repository.save(newEmployee);
+    }
+
+    public Employee replaceEmployeeById(Employee newEmployee, Long id) {
+        return repository.findById(id).map(employee -> {
+            employee = newEmployee;
+            return repository.save(employee);
+        }).orElseGet(() -> repository.save(newEmployee));
     }
 }
