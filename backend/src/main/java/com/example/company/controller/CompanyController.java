@@ -5,9 +5,10 @@ import com.example.company.service.CompanyService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+import org.springframework.web.bind.annotation.RequestMethod;
 @RestController
 @RequestMapping("/employees")
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class CompanyController {
 
     private final CompanyService service;
