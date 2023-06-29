@@ -12,7 +12,7 @@ import lombok.*;
 public class Employee {
 
     @Id
-    @Column(name = "id_emp", nullable = false)
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(name = "name", nullable = false)

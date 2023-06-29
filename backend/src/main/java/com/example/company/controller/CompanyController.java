@@ -5,8 +5,11 @@ import com.example.company.service.CompanyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Sort.Direction;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -24,10 +27,11 @@ public class CompanyController {
     }
 
     @GetMapping
-    public List<Employee> getAllEmployees() {
+    public ResponseEntity<Object> getAllEmployees(@RequestParam(defaultValue = "asc") String order, @RequestParam(defaultValue = "id") String sortBy) {
         requestCounter.incrementCount();
         System.out.println(requestCounter.getCount());
-        return this.service.getAllEmployees();
+        Direction sortOrder = order.equals("desc") ? Direction.DESC : Direction.ASC;
+        return new ResponseEntity<>(this.service.getAllEmployees(sortOrder, sortBy), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -55,7 +59,8 @@ public class CompanyController {
     @PutMapping("/{id}")
     public ResponseEntity<Object> replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
         requestCounter.incrementCount();
-        if (service.getEmployeeById(newEmployee.getId()) != null) {
+        if (!Objects.equals(newEmployee.getId(), id) ||
+                service.getEmployeeById(newEmployee.getId()) == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(service.replaceEmployeeById(newEmployee, id), HttpStatus.CREATED);

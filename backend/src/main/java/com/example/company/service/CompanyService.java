@@ -4,6 +4,7 @@ import com.example.company.entity.Employee;
 import com.example.company.repo.CompanyRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,13 +18,13 @@ public class CompanyService {
         this.repository = repository;
     }
 
-    public List<Employee> getAllEmployees() {
-        return repository.findAll();
+    public List<Employee> getAllEmployees(Sort.Direction order, String sortBy) {
+        return repository.findAll(Sort.by(order, sortBy));
     }
 
     public Employee getEmployeeById(long id) {
-       var result =  repository.findById(id);
-       return result.orElse(null);
+        var result = repository.findById(id);
+        return result.orElse(null);
     }
 
     public Employee addNewEmployee(Employee newEmployee) {
