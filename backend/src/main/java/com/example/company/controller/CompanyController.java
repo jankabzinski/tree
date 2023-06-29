@@ -3,13 +3,10 @@ package com.example.company.controller;
 import com.example.company.entity.Employee;
 import com.example.company.service.CompanyService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -34,30 +31,43 @@ public class CompanyController {
     }
 
     @GetMapping("/{id}")
-    public Employee getEmployee(@PathVariable Long id) {
+    public ResponseEntity<Object> getEmployee(@PathVariable Long id) {
         requestCounter.incrementCount();
 
-        return service.getEmployeeById(id);
+        var result = service.getEmployeeById(id);
+
+        if (result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
     }
 
     @PostMapping()
     public ResponseEntity<Object> addNewEmployee(@RequestBody Employee newEmployee) {
         requestCounter.incrementCount();
-        if(service.getEmployeeById(newEmployee.getId()) != null){
+        if (service.getEmployeeById(newEmployee.getId()) != null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(service.addNewEmployee(newEmployee), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    Employee replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
+    public ResponseEntity<Object> replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
         requestCounter.incrementCount();
-        return service.replaceEmployeeById(newEmployee, id);
+        if (service.getEmployeeById(newEmployee.getId()) != null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(service.replaceEmployeeById(newEmployee, id), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
-    void deleteEmployeeById(@RequestBody Long id) {
+    public ResponseEntity<Object> deleteEmployeeById(@PathVariable Long id) {
         requestCounter.incrementCount();
+        if (service.getEmployeeById(id) != null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         service.deleteEmployeeById(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
