@@ -12,6 +12,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { AddEmployeeComponent } from './add-employee/add-employee.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,8 @@ import { AddEmployeeComponent } from './add-employee/add-employee.component';
     AddEmployeeComponent
   ],
   imports: [
+    FormsModule,
+    ReactiveFormsModule,
     DialogModule,
     MatPaginatorModule,
     MatTableModule,
