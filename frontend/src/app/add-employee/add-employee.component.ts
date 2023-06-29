@@ -10,30 +10,27 @@ import { EmployeeService } from '../services/employee.service';
 export class AddEmployeeComponent {
   public form: FormGroup;
 
-  constructor(public formBuilder: FormBuilder, private EmployeeService: EmployeeService
+  constructor(
+    public formBuilder: FormBuilder,
+    private employeeService: EmployeeService
   ) {
     this.form = this.formBuilder.group({
-      id: '',
-      name: '',
-      job: ''
+      id: [''],
+      name: [''],
+      job: ['']
     });
   }
+
   submitForm(event: any) {
-    console.log(this.form)
-    var formData = new FormData();
-    formData.append('id', this.form.get('id')!.value)
-    formData.append('name', this.form.get('name')!.value)
-    formData.append('job', this.form.get('job')!.value)
-    this.EmployeeService.addEmployee(formData).subscribe(
-      {
-        complete: () => {
-          this.form.reset({
-            id: '',
-            name: '',
-            job: ''
-          });
-        }
+    event.preventDefault();
+
+
+
+
+    this.employeeService.addEmployee({"id":this.form.value.id,"name":this.form.value.name, "job":this.form.value.job}).subscribe({
+      complete: () => {
+        this.form.reset();
       }
-    )
+    });
   }
 }

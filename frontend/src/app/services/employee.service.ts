@@ -18,9 +18,9 @@ export class EmployeeService {
         );
     }
 
-    addEmployee(formData: FormData) {
+    addEmployee(json: any) {
         return this.http.post(
-            `${this.url}employees`, formData
+            `${this.url}employees`, json
         );
     }
 }
