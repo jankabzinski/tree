@@ -35,9 +35,7 @@ public class CompanyController {
     @GetMapping("/{id}")
     public ResponseEntity<Object> getEmployee(@PathVariable Long id) {
         requestCounter.incrementCount();
-
         var result = service.getEmployeeById(id);
-
         if (result == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
@@ -68,7 +66,7 @@ public class CompanyController {
     public ResponseEntity<Object> deleteEmployeeById(@PathVariable Long id) {
         requestCounter.incrementCount();
         if (service.getEmployeeById(id) != null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         service.deleteEmployeeById(id);
         return new ResponseEntity<>(HttpStatus.OK);
