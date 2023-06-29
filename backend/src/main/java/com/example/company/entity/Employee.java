@@ -3,22 +3,16 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="employee")
 public class Employee {
 
     @Id
-    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "job",nullable = false)
     private String job;
 
     /*@Column(name = "manager_id")
