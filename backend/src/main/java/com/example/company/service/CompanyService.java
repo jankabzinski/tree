@@ -22,7 +22,8 @@ public class CompanyService {
     }
 
     public Employee getEmployeeById(long id) {
-        return repository.findById(id).get();
+       var result =  repository.findById(id);
+       return result.orElse(null);
     }
 
     public Employee addNewEmployee(Employee newEmployee) {

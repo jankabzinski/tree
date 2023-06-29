@@ -2,10 +2,17 @@ package com.example.company.controller;
 
 import com.example.company.entity.Employee;
 import com.example.company.service.CompanyService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
+
 import org.springframework.web.bind.annotation.RequestMethod;
+
 @RestController
 @RequestMapping("/employees")
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
@@ -29,13 +36,17 @@ public class CompanyController {
     @GetMapping("/{id}")
     public Employee getEmployee(@PathVariable Long id) {
         requestCounter.incrementCount();
+
         return service.getEmployeeById(id);
     }
 
     @PostMapping()
-    public Employee addNewEmployee(@RequestBody Employee newEmployee) {
+    public ResponseEntity<Object> addNewEmployee(@RequestBody Employee newEmployee) {
         requestCounter.incrementCount();
-        return service.addNewEmployee(newEmployee);
+        if(service.getEmployeeById(newEmployee.getId()) != null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(service.addNewEmployee(newEmployee), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -45,7 +56,7 @@ public class CompanyController {
     }
 
     @DeleteMapping("/{id}")
-    void deleteEmployeeById(@RequestBody Long id){
+    void deleteEmployeeById(@RequestBody Long id) {
         requestCounter.incrementCount();
         service.deleteEmployeeById(id);
     }
