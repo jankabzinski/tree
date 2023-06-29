@@ -1,6 +1,6 @@
 <p-dialog [visible]="true" [closable]="false" [draggable]="false">
   <form [formGroup]="form" (ngSubmit)="submitForm($event)">
-    <label for="id">First Name</label>
+    <label for="id">Employee ID</label>
     <input type="number" min="100" step="100" id="id" name="id" placeholder="Your ID.." formControlName="id">
   
     <label for="name">Name</label>
