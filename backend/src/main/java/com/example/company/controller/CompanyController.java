@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Sort.Direction;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,10 +27,21 @@ public class CompanyController {
 
     @GetMapping
     public ResponseEntity<Object> getAllEmployees(@RequestParam(defaultValue = "asc") String order, @RequestParam(defaultValue = "id") String sortBy) {
-        requestCounter.incrementCount();
-        System.out.println(requestCounter.getCount());
-        Direction sortOrder = order.equals("desc") ? Direction.DESC : Direction.ASC;
-        return new ResponseEntity<>(this.service.getAllEmployees(sortOrder, sortBy), HttpStatus.OK);
+        try {
+            requestCounter.incrementCount();
+            System.out.println(requestCounter.getCount());
+
+            Direction sortOrder = order.equals("desc") ? Direction.DESC : Direction.ASC;
+            List<Employee> employees = this.service.getAllEmployees(sortOrder, sortBy);
+
+            if (employees.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<>(employees, HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{id}")
