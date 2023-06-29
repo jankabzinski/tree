@@ -29,8 +29,6 @@ public class CompanyController {
     public ResponseEntity<Object> getAllEmployees(@RequestParam(defaultValue = "asc") String order, @RequestParam(defaultValue = "id") String sortBy) {
         try {
             requestCounter.incrementCount();
-            System.out.println(requestCounter.getCount());
-
             Direction sortOrder = order.equals("desc") ? Direction.DESC : Direction.ASC;
             List<Employee> employees = this.service.getAllEmployees(sortOrder, sortBy);
 
@@ -48,7 +46,7 @@ public class CompanyController {
     public ResponseEntity<Object> getEmployee(@PathVariable Long id) {
         requestCounter.incrementCount();
         var result = service.getEmployeeById(id);
-        if (result == null) {
+        if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(result, HttpStatus.OK);
@@ -58,7 +56,7 @@ public class CompanyController {
     @PostMapping()
     public ResponseEntity<Object> addNewEmployee(@RequestBody Employee newEmployee) {
         requestCounter.incrementCount();
-        if (service.getEmployeeById(newEmployee.getId()) != null) {
+        if (service.getEmployeeById(newEmployee.getId()).isPresent()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(service.addNewEmployee(newEmployee), HttpStatus.CREATED);
@@ -68,7 +66,7 @@ public class CompanyController {
     public ResponseEntity<Object> replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
         requestCounter.incrementCount();
         if (!Objects.equals(newEmployee.getId(), id) ||
-                service.getEmployeeById(newEmployee.getId()) == null) {
+                service.getEmployeeById(newEmployee.getId()).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(service.replaceEmployeeById(newEmployee, id), HttpStatus.CREATED);
@@ -77,7 +75,7 @@ public class CompanyController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteEmployeeById(@PathVariable Long id) {
         requestCounter.incrementCount();
-        if (service.getEmployeeById(id) != null) {
+        if (service.getEmployeeById(id).isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         service.deleteEmployeeById(id);

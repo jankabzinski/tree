@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CompanyService {
@@ -22,9 +23,8 @@ public class CompanyService {
         return repository.findAll(Sort.by(order, sortBy));
     }
 
-    public Employee getEmployeeById(long id) {
-        var result = repository.findById(id);
-        return result.orElse(null);
+    public Optional<Employee> getEmployeeById(long id) {
+        return repository.findById(id);
     }
 
     public Employee addNewEmployee(Employee newEmployee) {
