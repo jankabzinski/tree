@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Sort.Direction;
 
-import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 
 import org.springframework.web.bind.annotation.RequestMethod;
