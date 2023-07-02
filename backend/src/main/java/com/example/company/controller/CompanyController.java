@@ -75,7 +75,7 @@ public class CompanyController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteEmployeeById(@PathVariable Long id) {
         requestCounter.incrementCount();
-        if (service.getEmployeeById(id).isPresent()) {
+        if (service.getEmployeeById(id).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         service.deleteEmployeeById(id);

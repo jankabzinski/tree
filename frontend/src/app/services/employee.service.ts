@@ -23,4 +23,12 @@ export class EmployeeService {
             `${this.url}employees`, json
         );
     }
+
+    public deleteEmployee(json: any) {
+        console.log(json)
+        return this.http.delete(
+            `${this.url}employees/` + json.id, json.id
+
+        )
+    }
 }

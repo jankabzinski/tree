@@ -1,25 +1,31 @@
-<p-button   routerLink="/new" styleClass="p-button-outlined  p-button-warning" label="Add new employee"></p-button>
-
-<p-dialog [visible]="true" [closable]="false" [draggable]="false">
-<table mat-table [dataSource]="employees" class="bg-light">
-    <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef> Employee ID </th>
-        <td mat-cell *matCellDef="let employee"> {{ employee.id }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> Name </th>
-        <td mat-cell *matCellDef="let employee"> {{ employee.name }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="job">
-        <th mat-header-cell *matHeaderCellDef> Job </th>
-        <td mat-cell *matCellDef="let employee"> {{ employee.job }} </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="['id', 'name', 'job']"></tr>
-    <tr mat-row *matRowDef="let employee; columns: ['id', 'name', 'job'];"></tr>
+<p-button routerLink="/new" styleClass="p-button-outlined  p-button-warning" label="Add new employee"></p-button>
 
 
-</table>
-</p-dialog>
+<p-table #dataTable [paginator]="true" [rowsPerPageOptions]="[3,5,10, 25, 50]" [columns]="cols" [value]="employees"
+    [tableStyle]="{ 'min-width': '50rem', 'padding-left': '30px', 'padding-right':'30px'}">
+    <ng-template pTemplate="header" let-columns>
+        <tr>
+            <th *ngFor="let col of columns">
+                {{ col.header }}
+            </th>
+            <th> </th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+            <td *ngFor="let col of columns">
+                {{ rowData[col.field] }}
+            </td>
+            <td>
+                <button pButton pRipple class="p-button-outlined">
+                    <i class="pi pi-cloud "></i> &nbsp; Edit
+                </button>
+                &nbsp;
+                <p-button pRipple styleClass="p-button-danger p-button-outlined p-button-rounded"
+                    (onClick)="deleteEmployee(rowData)">
+                    <i class="pi pi-times "></i> &nbsp; Delete
+                </p-button>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
