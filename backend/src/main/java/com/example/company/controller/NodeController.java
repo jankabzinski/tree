@@ -51,26 +51,41 @@ public class NodeController {
 
     @PostMapping()
     @Transactional
-    public ResponseEntity<Node> addNewNode(@RequestBody Node requestNode) {
-        if (requestNode.getId() != null || requestNode.getParent_id() == null && service.getRootId().isPresent())
+    public ResponseEntity<Node> addNewNode(@RequestBody Node requestNode, @RequestParam Optional<Boolean> asParentForChildren) {
+        //throw bad_request, when user is trying to add root, when tree already has a root
+        if (requestNode.getParent_id() == null && service.getRootId().isPresent())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+
         if (requestNode.getParent_id() != null) {
+            //if parent_id is given (new node is not a root) retrieve parent node
             Node parentNode = service.getNodeById(requestNode.getParent_id()).orElse(null);
+
+            //if parent_id is not in the base throw bad_request
             if (parentNode == null)
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            requestNode.setSum(parentNode.getSum() + requestNode.getValue());
+
+            //set sum to node's value plus parent's sum and add it to the db
+            requestNode.setSum(requestNode.getValue() + parentNode.getSum());
             Node newCreatedNode = service.addNewNode(requestNode);
-            for (Long childId : service.getNodeChildrenById(requestNode.getParent_id())) {
-                if (!Objects.equals(childId, newCreatedNode.getId())) {
-                    service.updateNodeById(null,
-                            childId,
-                            Optional.of(newCreatedNode.getSum()),
-                            Optional.of(newCreatedNode.getId()));
+
+            // if asParentForChildren was set to true
+            // iterate through all parent's children, except for the new node and
+            // change their parent to new node and recalculate sum
+
+            if (asParentForChildren.isPresent() && asParentForChildren.get()) {
+                for (Long childId : service.getNodeChildrenById(requestNode.getParent_id())) {
+                    if (!Objects.equals(childId, newCreatedNode.getId())) {
+                        service.updateNodeById(null,
+                                childId,
+                                Optional.of(newCreatedNode.getSum()),
+                                Optional.of(newCreatedNode.getId()));
+                    }
                 }
             }
             return new ResponseEntity<>(newCreatedNode, HttpStatus.CREATED);
         } else {
+            //parent_id was not given so it is a root, so sum = value
             requestNode.setSum(requestNode.getValue());
             Node newCreatedNode = service.addNewNode(requestNode);
             return new ResponseEntity<>(newCreatedNode, HttpStatus.CREATED);
@@ -79,12 +94,14 @@ public class NodeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Node> updateNode(@RequestBody Node newNode,
-                                             @PathVariable Long id,
-                                             @RequestParam Optional<Integer> parent_sum) {
+                                           @PathVariable Long id,
+                                           @RequestParam Optional<Integer> parent_sum) {
+        //check if id in the path and in the body are the same, otherwise throw bad_request
         if (!Objects.equals(newNode.getId(), id) ||
                 service.getNodeById(newNode.getId()).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        //we pass newParentId only while not passing new node object, because object has already had this field
         return new ResponseEntity<>(service.updateNodeById(newNode, id, parent_sum, Optional.empty()), HttpStatus.CREATED);
     }
 
@@ -92,6 +109,8 @@ public class NodeController {
     public ResponseEntity<Object> deleteNodeById(@PathVariable Long id, @RequestParam Optional<Long> parentId) {
         Optional<Node> nodeToDelete = service.getNodeById(id);
         if (nodeToDelete.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        //for each child change their parent, to deleted node's parent
+        //and recalculate sum, by omitting the value of deleted node
         service.getNodeChildrenById(id).forEach(childId -> service.updateNodeById(null,
                 childId,
                 Optional.of(nodeToDelete.get().getSum() - nodeToDelete.get().getValue()),
