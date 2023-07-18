@@ -51,32 +51,34 @@ public class NodeController {
 
     @PostMapping()
     @Transactional
-    public ResponseEntity<Object> addNewNode(@RequestBody Node newNode, @RequestParam("parentNode") Optional<Node> parentNode) {
-        if (newNode.getId() != null && service.getNodeById(newNode.getId()).isPresent() ||
-        newNode.getParent_id() == null && service.getRootId().isPresent())
+    public ResponseEntity<Node> addNewNode(@RequestBody Node requestNode) {
+        if (requestNode.getId() != null || requestNode.getParent_id() == null && service.getRootId().isPresent())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if (parentNode.isPresent()) {
-            Node presentParentNode = parentNode.get();
-            if (service.getNodeById(presentParentNode.getId()).isEmpty()) {
+        if (requestNode.getParent_id() != null) {
+            Node parentNode = service.getNodeById(requestNode.getParent_id()).orElse(null);
+            if (parentNode == null)
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            requestNode.setSum(parentNode.getSum() + requestNode.getValue());
+            Node newCreatedNode = service.addNewNode(requestNode);
+            for (Long childId : service.getNodeChildrenById(requestNode.getParent_id())) {
+                if (!Objects.equals(childId, newCreatedNode.getId())) {
+                    service.updateNodeById(null,
+                            childId,
+                            Optional.of(newCreatedNode.getSum()),
+                            Optional.of(newCreatedNode.getId()));
+                }
             }
-            newNode.setSum(presentParentNode.getSum() + newNode.getValue());
-            for (Long childId : service.getNodeChildrenById(presentParentNode.getId())) {
-                service.updateNodeById(null,
-                        childId,
-                        Optional.of(newNode.getSum()),
-                        Optional.of(newNode.getId()));
-            }
+            return new ResponseEntity<>(newCreatedNode, HttpStatus.CREATED);
         } else {
-            newNode.setSum(newNode.getValue());
+            requestNode.setSum(requestNode.getValue());
+            Node newCreatedNode = service.addNewNode(requestNode);
+            return new ResponseEntity<>(newCreatedNode, HttpStatus.CREATED);
         }
-
-        return new ResponseEntity<>(service.addNewNode(newNode), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateNode(@RequestBody Node newNode,
+    public ResponseEntity<Node> updateNode(@RequestBody Node newNode,
                                              @PathVariable Long id,
                                              @RequestParam Optional<Integer> parent_sum) {
         if (!Objects.equals(newNode.getId(), id) ||
@@ -90,12 +92,12 @@ public class NodeController {
     public ResponseEntity<Object> deleteNodeById(@PathVariable Long id, @RequestParam Optional<Long> parentId) {
         Optional<Node> nodeToDelete = service.getNodeById(id);
         if (nodeToDelete.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        if (parentId.isPresent()) {
-            service.getNodeChildrenById(id).forEach(childId -> service.updateNodeById(null,
-                    childId,
-                    Optional.of(nodeToDelete.get().getSum() - nodeToDelete.get().getValue()),
-                    parentId));
-        }
+        service.getNodeChildrenById(id).forEach(childId -> service.updateNodeById(null,
+                childId,
+                Optional.of(nodeToDelete.get().getSum() - nodeToDelete.get().getValue()),
+                parentId));
+
+
         service.deleteEmployeeById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
