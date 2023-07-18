@@ -51,18 +51,15 @@ public class NodeController {
 
     @PostMapping()
     @Transactional
-    public ResponseEntity<Object> addNewNode(@RequestBody Node newNode, @RequestParam Long childNodeId) {
-        if (service.getNodeById(newNode.getId()).isPresent()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<Object> addNewNode(@RequestBody Node newRequestNode, @RequestParam("childId") Optional<Long> childId, @RequestParam("parentSum") Optional<Integer> parentSum) {
 
-        Node createdNewNode = service.addNewNode(newNode);
+        newRequestNode.setSum(parentSum.orElse(0) + newRequestNode.getValue());
+        Node createdNewNode = service.addNewNode(newRequestNode);
 
-        if (childNodeId != null) {
-            Optional<Node> childNode = service.getNodeById(childNodeId);
+        if (childId.isPresent()) {
+            Optional<Node> childNode = service.getNodeById(childId.get());
             if (childNode.isPresent()) {
-                childNode.get().setParent_id(createdNewNode.getId());
-                service.updateNodeById(childNode.get(),childNodeId);
+                service.updateNodeById(null, childId.get(), Optional.empty(), Optional.of(createdNewNode.getId()));
             } else {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
@@ -72,12 +69,12 @@ public class NodeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateNode(@RequestBody Node newNode, @PathVariable Long id) {
+    public ResponseEntity<Object> updateNode(@RequestBody Node newNode, @PathVariable Long id, @RequestParam Optional<Integer> parent_sum) {
         if (!Objects.equals(newNode.getId(), id) ||
                 service.getNodeById(newNode.getId()).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(service.updateNodeById(newNode, id), HttpStatus.CREATED);
+        return new ResponseEntity<>(service.updateNodeById(newNode, id, parent_sum, Optional.empty()), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")

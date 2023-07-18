@@ -31,22 +31,27 @@ public class NodeService {
         return repository.save(newNode);
     }
 
-    public Node updateNodeById(Node newNode, Long id) {
+    public Node updateNodeById(Node newNode, Long id, Optional<Integer> parentSum, Optional<Long> newParentId) {
         return repository.findById(id).map(node -> {
-            node.setValue(newNode.getValue());
-            node.setParent_id(newNode.getParent_id());
-            node.setSum(newNode.getSum());
+            if (newNode != null) {
+                node.setValue(newNode.getValue());
+                node.setParent_id(newNode.getParent_id());
+            } else newParentId.ifPresent(node::setParent_id);
+
+            node.setSum(parentSum.orElse(0) + node.getValue());
+
+
+            List<Long> childrenIds = getNodeChildrenById(id);
+            childrenIds.forEach(childId -> updateNodeById(null, childId, Optional.of(node.getSum()), Optional.empty()));
+
+
             return repository.save(node);
-        }).orElseGet(() -> repository.save(newNode));
+        }).orElseThrow(() -> new NoSuchElementException("Węzeł o podanym identyfikatorze nie istnieje"));
     }
 
-    public Node updateSumInNodeById(int parent_sum, Long id) {
-        return repository.findById(id)
-                .map(node -> {
-                    node.setSum(parent_sum + node.getValue());
-                    return repository.save(node);
-                })
-                .orElseThrow(() -> new NoSuchElementException("Węzeł o podanym identyfikatorze nie istnieje"));
+
+    private List<Long> getNodeChildrenById(Long id) {
+        return repository.findIdsByParentId(id);
     }
 
     public void deleteEmployeeById(Long id) {

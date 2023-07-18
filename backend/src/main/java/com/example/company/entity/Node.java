@@ -10,6 +10,7 @@ import lombok.*;
 public class Node {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long parent_id;
