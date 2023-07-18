@@ -78,9 +78,11 @@ public class NodeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteNodeById(@PathVariable Long id) {
-        if (service.getNodeById(id).isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<Object> deleteNodeById(@PathVariable Long id, @RequestParam Optional<Long> parentId) {
+        Optional<Node> nodeToDelete = service.getNodeById(id);
+        if (nodeToDelete.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (parentId.isPresent()) {
+            service.getNodeChildrenById(id).forEach(childId -> service.updateNodeById(null, childId, Optional.of(nodeToDelete.get().getSum() - nodeToDelete.get().getValue()), parentId));
         }
         service.deleteEmployeeById(id);
         return new ResponseEntity<>(HttpStatus.OK);

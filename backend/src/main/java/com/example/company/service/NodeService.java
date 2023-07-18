@@ -50,7 +50,7 @@ public class NodeService {
     }
 
 
-    private List<Long> getNodeChildrenById(Long id) {
+    public List<Long> getNodeChildrenById(Long id) {
         return repository.findIdsByParentId(id);
     }
 
