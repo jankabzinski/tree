@@ -5,7 +5,6 @@ import com.example.company.service.NodeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Sort.Direction;
 
 import java.util.List;
 import java.util.Objects;
@@ -18,17 +17,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class NodeController {
 
     private final NodeService service;
-    private final RequestCounter requestCounter;
 
-    public NodeController(NodeService service, RequestCounter requestCounter) {
+    public NodeController(NodeService service) {
         this.service = service;
-        this.requestCounter = requestCounter;
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllEmployees() {
+    public ResponseEntity<Object> getAllNodes() {
         try {
-            requestCounter.incrementCount();
             List<Node> nodes = this.service.getAllNodes();
 
             if (nodes.isEmpty()) {
@@ -42,8 +38,7 @@ public class NodeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getEmployee(@PathVariable Long id) {
-        requestCounter.incrementCount();
+    public ResponseEntity<Object> getNode(@PathVariable Long id) {
         var result = service.getNodeById(id);
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -54,7 +49,6 @@ public class NodeController {
 
     @PostMapping()
     public ResponseEntity<Object> addNewEmployee(@RequestBody Node newNode) {
-        requestCounter.incrementCount();
         if (service.getNodeById(newNode.getId()).isPresent()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -63,7 +57,6 @@ public class NodeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> replaceEmployee(@RequestBody Node newNode, @PathVariable Long id) {
-        requestCounter.incrementCount();
         if (!Objects.equals(newNode.getId(), id) ||
                 service.getNodeById(newNode.getId()).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -73,7 +66,6 @@ public class NodeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteEmployeeById(@PathVariable Long id) {
-        requestCounter.incrementCount();
         if (service.getNodeById(id).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

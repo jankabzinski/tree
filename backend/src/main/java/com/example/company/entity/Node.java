@@ -1,4 +1,5 @@
 package com.example.company.entity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,10 +12,11 @@ public class Node {
     @Id
     private Long id;
 
-    private int value;
-
     private Long parent_id;
 
+    private int value;
+
+    private int sum;
 
 }
 
