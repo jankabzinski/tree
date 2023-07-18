@@ -57,4 +57,8 @@ public class NodeService {
     public void deleteEmployeeById(Long id) {
         repository.deleteById(id);
     }
+
+    public Optional<Long> getRootId() {
+        return repository.findRootId();
+    }
 }
