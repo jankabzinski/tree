@@ -1,33 +1,33 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Employee } from "../models/employee.model";
+import { Node } from "../models/node.model";
 import { Observable } from "rxjs/internal/Observable";
 
 @Injectable({
     providedIn: 'root',
 })
 
-export class EmployeeService {
+export class NodeService {
     readonly url: string = 'http://localhost:8080/';
 
     constructor(private http: HttpClient) { }
 
-    getEmployees(): Observable<Employee[]> {
-        return this.http.get<Employee[]>(
-            `${this.url}employees`
+    getNode(): Observable<Node[]> {
+        return this.http.get<Node[]>(
+            `${this.url}nodes`
         );
     }
 
-    addEmployee(json: any) {
+    addNode(json: any) {
         return this.http.post(
-            `${this.url}employees`, json
+            `${this.url}nodes`, json
         );
     }
 
-    public deleteEmployee(json: any) {
+    public deleteNode(json: any) {
         console.log(json)
         return this.http.delete(
-            `${this.url}employees/` + json.id, json.id
+            `${this.url}nodes/` + json.id, json.id
 
         )
     }
