@@ -12,10 +12,13 @@ import {MatTableModule} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {InplaceModule} from 'primeng/inplace';
+import { TreeComponent } from './tree/tree.component';
+import {NgxGraphModule} from "@swimlane/ngx-graph";
 
 @NgModule({
   declarations: [
     AppComponent,
+    TreeComponent,
   ],
   imports: [
     InplaceModule,
@@ -30,7 +33,8 @@ import {InplaceModule} from 'primeng/inplace';
     ButtonModule,
     BrowserModule,
     AppRoutingModule,
-    TableModule
+    TableModule,
+    NgxGraphModule
   ],
   providers: [],
   bootstrap: [AppComponent]
