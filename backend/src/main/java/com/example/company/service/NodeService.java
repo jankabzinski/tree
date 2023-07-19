@@ -31,18 +31,19 @@ public class NodeService {
         return repository.save(newNode);
     }
 
-    public Node updateNodeById(Node newNode, Long id, Optional<Integer> parentSum, Optional<Long> newParentId) {
+    public Node updateNodeById(Optional <Node> newNode, Long id, Optional<Integer> parentSum, Optional<Long> newParentId) {
+        //if Node object was given, map its value and parent_id, otherwise take parent_id from the argument newParentId (it should be given in that case)
         return repository.findById(id).map(node -> {
-            if (newNode != null) {
-                node.setValue(newNode.getValue());
-                node.setParent_id(newNode.getParent_id());
+            if (newNode.isPresent()) {
+                node.setValue(newNode.get().getValue());
+                node.setParent_id(newNode.get().getParent_id());
             } else newParentId.ifPresent(node::setParent_id);
 
+            //set sum to parent's sum + node's value
             node.setSum(parentSum.orElse(0) + node.getValue());
 
-
-            List<Long> childrenIds = getNodeChildrenById(id);
-            childrenIds.forEach(childId -> updateNodeById(null, childId, Optional.of(node.getSum()), Optional.empty()));
+            //for each child of our node update theirs sum
+            getNodeChildrenById(id).forEach(childId -> updateNodeById(Optional.empty(), childId, Optional.of(node.getSum()), Optional.empty()));
 
 
             return repository.save(node);

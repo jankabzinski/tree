@@ -1,16 +1,13 @@
 package com.example.company.controller;
-
 import com.example.company.entity.Node;
 import com.example.company.service.NodeService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @RestController
@@ -76,7 +73,7 @@ public class NodeController {
             if (asParentForChildren.isPresent() && asParentForChildren.get()) {
                 for (Long childId : service.getNodeChildrenById(requestNode.getParent_id())) {
                     if (!Objects.equals(childId, newCreatedNode.getId())) {
-                        service.updateNodeById(null,
+                        service.updateNodeById(Optional.empty(),
                                 childId,
                                 Optional.of(newCreatedNode.getSum()),
                                 Optional.of(newCreatedNode.getId()));
@@ -102,13 +99,19 @@ public class NodeController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         //we pass newParentId only while not passing new node object, because object has already had this field
-        return new ResponseEntity<>(service.updateNodeById(newNode, id, parent_sum, Optional.empty()), HttpStatus.CREATED);
+        return new ResponseEntity<>(service.updateNodeById(Optional.of(newNode), id, parent_sum, Optional.empty()), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteNodeById(@PathVariable Long id, @RequestParam Optional<Long> parentId) {
         Optional<Node> nodeToDelete = service.getNodeById(id);
         if (nodeToDelete.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        //my idea is that we should not delete the root, because we could get more than one tree after destroying the links
+        if(parentId.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         //for each child change their parent, to deleted node's parent
         //and recalculate sum, by omitting the value of deleted node
         service.getNodeChildrenById(id).forEach(childId -> service.updateNodeById(null,
