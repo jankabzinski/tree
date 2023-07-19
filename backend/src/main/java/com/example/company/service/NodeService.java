@@ -48,6 +48,7 @@ public class NodeService {
 
             return repository.save(node);
         }).orElseThrow(() -> new NoSuchElementException("Węzeł o podanym identyfikatorze nie istnieje"));
+        //throw Exception when node with given id was not found
     }
 
 

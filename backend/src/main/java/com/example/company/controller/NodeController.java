@@ -114,7 +114,7 @@ public class NodeController {
 
         //for each child change their parent, to deleted node's parent
         //and recalculate sum, by omitting the value of deleted node
-        service.getNodeChildrenById(id).forEach(childId -> service.updateNodeById(null,
+        service.getNodeChildrenById(id).forEach(childId -> service.updateNodeById(Optional.empty(),
                 childId,
                 Optional.of(nodeToDelete.get().getSum() - nodeToDelete.get().getValue()),
                 parentId));
