@@ -12,18 +12,6 @@ import {Component} from '@angular/core';
         </svg:marker>
       </ng-template>
 
-      <ng-template #clusterTemplate let-cluster>
-        <svg:g class="node cluster">
-          <svg:rect
-            rx="5"
-            ry="5"
-            [attr.width]="cluster.dimension.width"
-            [attr.height]="cluster.dimension.height"
-            [attr.fill]="cluster.data.color"
-          />
-        </svg:g>
-      </ng-template>
-
       <ng-template #nodeTemplate let-node>
         <svg:g class="node">
           <svg:rect
@@ -47,8 +35,7 @@ import {Component} from '@angular/core';
               [style.dominant-baseline]="link.dominantBaseline"
               startOffset="50%"
             >
-              {{link.label}}
-            </textPath>
+napis na linku            </textPath>
           </svg:text>
         </svg:g>
       </ng-template>
@@ -63,8 +50,8 @@ export class TreeComponent {
   ];
 
   links = [
-    {source: '1', target: '2'},
-    {source: '3', target: '1', id: '2'}
+    {source: '3', target: '1', id: '3'},
+    {source: '1',target: '2', id: '1'}
     // Dodaj pozostałe krawędzie...
   ];
 }
