@@ -1,7 +1,7 @@
-package com.example.company.service;
+package com.example.node.service;
 
-import com.example.company.entity.Node;
-import com.example.company.repo.NodeRepository;
+import com.example.node.entity.Node;
+import com.example.node.repo.NodeRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

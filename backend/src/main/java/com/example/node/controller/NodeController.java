@@ -1,6 +1,6 @@
-package com.example.company.controller;
-import com.example.company.entity.Node;
-import com.example.company.service.NodeService;
+package com.example.node.controller;
+import com.example.node.entity.Node;
+import com.example.node.service.NodeService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

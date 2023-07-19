@@ -1,6 +1,6 @@
-package com.example.company.repo;
+package com.example.node.repo;
 
-import com.example.company.entity.Node;
+import com.example.node.entity.Node;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
