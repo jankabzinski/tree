@@ -1,5 +1,6 @@
 export interface Node {
-    id: number;
-    name: string;
-    job: string;
+  name: number;
+  parent_id: number;
+  value: number;
+  sum: number;
 }

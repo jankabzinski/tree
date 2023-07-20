@@ -1,5 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import * as echarts from 'echarts';
+import {NodeService} from "../services/node.service";
+import {Link} from "../models/link.model";
+import {Node} from "../models/node.model";
 
 @Component({
   selector: 'app-tree',
@@ -8,12 +11,34 @@ import * as echarts from 'echarts';
 })
 export class TreeComponent implements OnInit, OnDestroy {
   private chart: any;
+  private nodes: Node[] = [];
+  private links: Link[] = [];
 
-  constructor() { }
+  constructor(private nodeService: NodeService) {
+  }
 
   ngOnInit(): void {
     this.initChart();
-    this.renderGraph();
+
+    this.nodeService.getNodes().subscribe((json: any) => {
+      // @ts-ignore
+      this.nodes = json.map(obj => {
+        const { id, ...rest } = obj; // Pozbądź się pola "id", resztę skopiuj
+        return { name: id, ...rest }; // Utwórz nowy obiekt z polem "name" i resztą pól
+      });
+      for (const node of this.nodes) {
+        if (node.parent_id !== null) {
+          const link: Link = {
+            source: node.parent_id,
+            target: node.name,
+          };
+          this.links.push(link);
+        }
+      }
+      console.log(this.nodes)
+      console.log(this.links)
+      this.renderGraph();
+    })
   }
 
   ngOnDestroy(): void {
@@ -28,37 +53,7 @@ export class TreeComponent implements OnInit, OnDestroy {
   }
 
   renderGraph(): void {
-    const data = {
-      nodes: [
-        { name: 'Node 1', value: 'First Node' },
-        { name: 'Node 2', value: 'Second Node' },
-        { name: 'Node 3', value: 'Third Node' },
-        { name: 'Node 4', value: 'Fourth Node' },
-        { name: 'Node 5', value: 'Fourth Node' },
-        { name: 'Node 6', value: 'Fourth Node' },
 
-        { name: 'Node 7', value: 'Fourth Node' },
-        { name: 'Node 8', value: 'Fourth Node' },
-        { name: 'Node 9', value: 'Fourth Node' },
-        { name: 'Node 10', value: 'Fourth Node' },
-
-      ],
-      links: [
-        { source: 0, target: 1 },
-        { source: 0, target: 2 },
-        { source: 1, target: 3 },
-        { source: 3, target: 4 },
-        { source: 2, target: 5 },
-        { source: 0, target: 6 },
-        { source: 0, target: 9 },
-
-        { source: 3, target: 8},
-
-        { source: 4, target: 7 },
-
-
-      ]
-    };
 
     const option = {
       title: {
@@ -75,14 +70,16 @@ export class TreeComponent implements OnInit, OnDestroy {
         label: {
           show: true,
           position: 'inside',
-          formatter: '{b}\n\n{c}'
+          formatter: (params: any) => {
+            return `${params.data.value}\n\n${params.data.sum}`;
+          }
         },
         edgeSymbol: ['circle', 'arrow'],
         edgeSymbolSize: [4, 10],
-        data: data.nodes,
-        links: data.links,
-        lineStyle:{
-          width:5
+        data: this.nodes,
+        links: this.links,
+        lineStyle: {
+          width: 5
         },
         emphasis: {
           focus: 'adjacency',
@@ -91,10 +88,16 @@ export class TreeComponent implements OnInit, OnDestroy {
           }
         },
         force: {
-          repulsion: 100, // Dostosowanie wartości repulsion (zmniejszenie odpychania)
+          repulsion: 200, // Dostosowanie wartości repulsion (zmniejszenie odpychania)
           gravity: 0.02,   // Zwiększenie wartości gravity (większe przyciąganie do centrum)
           edgeLength: [70, 100], // Dostosowanie długości krawędzi (zmniejszenie odległości między wierzchołkami)
           orient: 'LR' // Orientacja drzewa - Top to Bottom (góra na dole)
+        },
+        itemStyle: {
+          color: (node: any) => {
+            // Ustawienie innego koloru dla korzenia (indeks 0)
+            return node.parent_id ===null ? 'lightyellow' : 'turquoise';
+          }
         }
       }]
     };

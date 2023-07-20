@@ -12,7 +12,7 @@ export class NodeService {
 
     constructor(private http: HttpClient) { }
 
-    getNodes(): Observable<Node[]> {
+    getNodes() {
         return this.http.get<Node[]>(
             `${this.url}nodes`
         );
