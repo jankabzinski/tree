@@ -22,15 +22,16 @@ export class TreeComponent implements OnInit, OnDestroy {
 
     this.nodeService.getNodes().subscribe((json: any) => {
       // @ts-ignore
-      this.nodes = json.map(obj => {
-        const { id, ...rest } = obj; // Pozbądź się pola "id", resztę skopiuj
-        return { name: id, ...rest }; // Utwórz nowy obiekt z polem "name" i resztą pól
-      });
+      this.nodes = json.map((node) => ({
+        ...node,
+        parent_id: node.parent_id !== null ? node.parent_id.toString() : node.parent_id,
+        id: node.id.toString(),
+      }));
       for (const node of this.nodes) {
         if (node.parent_id !== null) {
           const link: Link = {
             source: node.parent_id,
-            target: node.name,
+            target: node.id,
           };
           this.links.push(link);
         }
@@ -91,13 +92,10 @@ export class TreeComponent implements OnInit, OnDestroy {
           repulsion: 200, // Dostosowanie wartości repulsion (zmniejszenie odpychania)
           gravity: 0.02,   // Zwiększenie wartości gravity (większe przyciąganie do centrum)
           edgeLength: [70, 100], // Dostosowanie długości krawędzi (zmniejszenie odległości między wierzchołkami)
-          orient: 'LR' // Orientacja drzewa - Top to Bottom (góra na dole)
+          orient: 'TB' // Orientacja drzewa - Top to Bottom (góra na dole)
         },
         itemStyle: {
-          color: (node: any) => {
-            // Ustawienie innego koloru dla korzenia (indeks 0)
-            return node.parent_id ===null ? 'lightyellow' : 'turquoise';
-          }
+          color: 'turquoise'
         }
       }]
     };

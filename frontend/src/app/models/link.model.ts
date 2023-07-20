@@ -1,4 +1,4 @@
 export interface Link{
-  source: number;
-  target:number
+  source: string;
+  target:string
 }
