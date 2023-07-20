@@ -1,21 +1,20 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import * as echarts from 'echarts';
-import {NodeService} from "../services/node.service";
-import {Link} from "../models/link.model";
-import {Node} from "../models/node.model";
+import { NodeService } from '../services/node.service';
+import { Link } from '../models/link.model';
+import { Node } from '../models/node.model';
 
 @Component({
   selector: 'app-tree',
   templateUrl: './tree.component.html',
-  styleUrls: ['./tree.component.css']
+  styleUrls: ['./tree.component.css'],
 })
 export class TreeComponent implements OnInit, OnDestroy {
   private chart: any;
   private nodes: Node[] = [];
   private links: Link[] = [];
 
-  constructor(private nodeService: NodeService) {
-  }
+  constructor(private nodeService: NodeService) {}
 
   ngOnInit(): void {
     this.initChart();
@@ -37,7 +36,7 @@ export class TreeComponent implements OnInit, OnDestroy {
         }
       }
       this.renderGraph();
-    })
+    });
   }
 
   ngOnDestroy(): void {
@@ -51,65 +50,82 @@ export class TreeComponent implements OnInit, OnDestroy {
     this.chart = echarts.init(chartElement);
   }
 
+  // ... poprzedni kod ...
+
   renderGraph(): void {
+    const treeData = [
+      {
+        name: 'Wierzchołek 1',
+        value: 100,
+        children: [
+          {
+            name: 'Podwierzchołek 1.1',
+            value: 50,
+            children: [
+              {
+                name: 'Podwierzchołek 1.1.1',
+                value: 30,
+              },
+              {
+                name: 'Podwierzchołek 1.1.2',
+                value: 20,
+              },
+            ],
+          },
+          {
+            name: 'Podwierzchołek 1.2',
+            value: 70,
+          },
+        ],
+      },
+      {
+        name: 'Wierzchołek 2',
+        value: 200,
+        children: [
+          {
+            name: 'Podwierzchołek 2.1',
+            value: 80,
+          },
+          {
+            name: 'Podwierzchołek 2.2',
+            value: 120,
+          },
+        ],
+      },
+    ];
 
 
     const option = {
-      title: {
-        text: 'Przykładowy graf ECharts - drzewo'
-      },
-      animationDurationUpdate: 0,
-      animationEasingUpdate: 'quinticInOut',
-      series: [{
-        type: 'graph',
-        layout: 'force', // Układ siłowy
-        roam: true,
-        symbol: 'circle',
-        symbolSize: 60,
-
-        label: {
-          show: true,
-          position: 'inside',
-          formatter: (params: any) => {
-            if(params.data.leaf === true) {
-              return `Value: ${params.data.value}\n\nSum: ${params.data.sum}`;
-            }
-            else{
-              return `Value: ${params.data.value}`;
-            }
-          }
+      series: [
+        {
+          expandAndCollapse: false,
+          type: 'tree',
+          data: treeData,
+          top: '10%', // Ustaw odpowiednią pozycję wizualizacji na osi Y
+          left: '10%', // Ustaw odpowiednią pozycję wizualizacji na osi X
+          bottom: '10%', // Ustaw odpowiednią pozycję wizualizacji na osi Y
+          right: '10%', // Ustaw odpowiednią pozycję wizualizacji na osi X
+          symbol: 'circle', // Ustaw typ symbolu dla wierzchołków (np. 'circle')
+          symbolSize: 20, // Ustaw wielkość symbolu dla wierzchołków
+          label: {
+            show: true, // Pokaż etykiety wierzchołków
+            position: 'top', // Ustaw pozycję etykiety (np. 'top', 'inside')
+          },
+          leaves: {
+            label: {
+              position: 'bottom', // Ustaw pozycję etykiety dla liści (np. 'bottom', 'inside')
+            },
+          },
+          emphasis: {
+            focus: 'descendant', // Podświetlaj potomków w przypadku najechania na wierzchołek
+          },
         },
-        edgeSymbol: ['circle', 'arrow'],
-        edgeSymbolSize: [4, 10],
-        data: this.nodes,
-        links: this.links,
-        lineStyle: {
-          width: 5
-        },
-        emphasis: {
-          focus: 'adjacency',
-          lineStyle: {
-            width: 10
-          }
-        },
-        force: {
-          repulsion: 200, // Dostosowanie wartości repulsion (zmniejszenie odpychania)
-          gravity: 0.02,   // Zwiększenie wartości gravity (większe przyciąganie do centrum)
-          edgeLength: [70, 100], // Dostosowanie długości krawędzi (zmniejszenie odległości między wierzchołkami)
-          orient: 'TB' // Orientacja drzewa - Top to Bottom (góra na dole)
-        },
-        itemStyle: {
-
-          color: (params:any)=>{
-            if(params.data.parent_id === null)
-              return 'red';
-          else{
-            return 'turquoise';
-            }}
-        }
-      }]
+      ],
     };
 
     this.chart.setOption(option, true);
+
+
   }
+
 }
