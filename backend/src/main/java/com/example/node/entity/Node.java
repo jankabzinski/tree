@@ -3,7 +3,8 @@ package com.example.node.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -19,6 +20,7 @@ public class Node {
 
     private int sum;
 
+    private boolean leaf;
 }
 
 

@@ -36,8 +36,6 @@ export class TreeComponent implements OnInit, OnDestroy {
           this.links.push(link);
         }
       }
-      console.log(this.nodes)
-      console.log(this.links)
       this.renderGraph();
     })
   }
@@ -68,11 +66,17 @@ export class TreeComponent implements OnInit, OnDestroy {
         roam: true,
         symbol: 'circle',
         symbolSize: 60,
+
         label: {
           show: true,
           position: 'inside',
           formatter: (params: any) => {
-            return `${params.data.value}\n\n${params.data.sum}`;
+            if(params.data.leaf === true) {
+              return `Value: ${params.data.value}\n\nSum: ${params.data.sum}`;
+            }
+            else{
+              return `Value: ${params.data.value}`;
+            }
           }
         },
         edgeSymbol: ['circle', 'arrow'],
@@ -95,7 +99,13 @@ export class TreeComponent implements OnInit, OnDestroy {
           orient: 'TB' // Orientacja drzewa - Top to Bottom (góra na dole)
         },
         itemStyle: {
-          color: 'turquoise'
+
+          color: (params:any)=>{
+            if(params.data.parent_id === null)
+              return 'red';
+          else{
+            return 'turquoise';
+            }}
         }
       }]
     };

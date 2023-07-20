@@ -31,7 +31,7 @@ public class NodeService {
         return repository.save(newNode);
     }
 
-    public Node updateNodeById(Optional <Node> newNode, Long id, Optional<Integer> parentSum, Optional<Long> newParentId) {
+    public Node updateNodeById(Optional<Node> newNode, Long id, Optional<Integer> parentSum, Optional<Long> newParentId) {
         //if Node object was given, map its value and parent_id, otherwise take parent_id from the argument newParentId (it should be given in that case)
         return repository.findById(id).map(node -> {
             if (newNode.isPresent()) {
@@ -45,12 +45,16 @@ public class NodeService {
             //for each child of our node update theirs sum
             getNodeChildrenById(id).forEach(childId -> updateNodeById(Optional.empty(), childId, Optional.of(node.getSum()), Optional.empty()));
 
-
             return repository.save(node);
         }).orElseThrow(() -> new NoSuchElementException("Węzeł o podanym identyfikatorze nie istnieje"));
         //throw Exception when node with given id was not found
     }
-
+    public void updateLeafStatus(Long id, boolean isLeaf){
+        repository.findById(id).map(node->{
+            node.setLeaf(isLeaf);
+            return repository.save(node);
+        });
+    }
 
     public List<Long> getNodeChildrenById(Long id) {
         return repository.findIdsByParentId(id);
@@ -62,5 +66,9 @@ public class NodeService {
 
     public Optional<Long> getRootId() {
         return repository.findRootId();
+    }
+
+    public void checkIfParentIsLeaf(Long id) {
+        if (getNodeChildrenById(id).isEmpty()) updateLeafStatus(id, true);
     }
 }

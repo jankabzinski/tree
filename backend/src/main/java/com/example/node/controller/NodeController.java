@@ -1,13 +1,16 @@
 package com.example.node.controller;
+
 import com.example.node.entity.Node;
 import com.example.node.service.NodeService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @RestController
@@ -53,6 +56,8 @@ public class NodeController {
         if (requestNode.getParent_id() == null && service.getRootId().isPresent())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        //new node is a leaf when asParentForChildren flag was not set to true
+        requestNode.setLeaf(asParentForChildren.isEmpty() || !asParentForChildren.get());
 
         if (requestNode.getParent_id() != null) {
             //if parent_id is given (new node is not a root) retrieve parent node
@@ -82,9 +87,10 @@ public class NodeController {
             }
             return new ResponseEntity<>(newCreatedNode, HttpStatus.CREATED);
         } else {
-            //parent_id was not given so it is a root, so sum = value
+            //parent_id was not given, so it is a root, so sum = value
             requestNode.setSum(requestNode.getValue());
             Node newCreatedNode = service.addNewNode(requestNode);
+            service.updateLeafStatus(newCreatedNode.getParent_id(), false);
             return new ResponseEntity<>(newCreatedNode, HttpStatus.CREATED);
         }
     }
@@ -108,7 +114,7 @@ public class NodeController {
         if (nodeToDelete.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         //my idea is that we should not delete the root, because we could get more than one tree after destroying the links
-        if(parentId.isEmpty()){
+        if (parentId.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -119,8 +125,9 @@ public class NodeController {
                 Optional.of(nodeToDelete.get().getSum() - nodeToDelete.get().getValue()),
                 parentId));
 
-
         service.deleteEmployeeById(id);
+
+        service.checkIfParentIsLeaf(parentId.get());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
