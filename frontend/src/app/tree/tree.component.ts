@@ -34,13 +34,29 @@ export class TreeComponent implements OnInit, OnDestroy {
         { name: 'Node 2', value: 'Second Node' },
         { name: 'Node 3', value: 'Third Node' },
         { name: 'Node 4', value: 'Fourth Node' },
+        { name: 'Node 5', value: 'Fourth Node' },
+        { name: 'Node 6', value: 'Fourth Node' },
+
+        { name: 'Node 7', value: 'Fourth Node' },
+        { name: 'Node 8', value: 'Fourth Node' },
+        { name: 'Node 9', value: 'Fourth Node' },
+        { name: 'Node 10', value: 'Fourth Node' },
+
       ],
       links: [
-        { source: 'Node 1', target: 'Node 2' },
-        { source: 'Node 1', target: 'Node 3' },
-        { source: 'Node 2', target: 'Node 3' },
-        { source: 'Node 2', target: 'Node 4' },
-        { source: 'Node 3', target: 'Node 4' },
+        { source: 0, target: 1 },
+        { source: 0, target: 2 },
+        { source: 1, target: 3 },
+        { source: 3, target: 4 },
+        { source: 2, target: 5 },
+        { source: 0, target: 6 },
+        { source: 0, target: 9 },
+
+        { source: 3, target: 8},
+
+        { source: 4, target: 7 },
+
+
       ]
     };
 
@@ -48,24 +64,26 @@ export class TreeComponent implements OnInit, OnDestroy {
       title: {
         text: 'Przykładowy graf ECharts - drzewo'
       },
-      tooltip: {},
-      animationDurationUpdate: 1500,
+      animationDurationUpdate: 0,
       animationEasingUpdate: 'quinticInOut',
       series: [{
         type: 'graph',
-        layout: 'force',
+        layout: 'force', // Układ siłowy
         roam: true,
-        symbol: 'circle', // Kształt wierzchołka jako koło
-        symbolSize: 80, // Rozmiar wierzchołka
+        symbol: 'circle',
+        symbolSize: 60,
         label: {
           show: true,
-          position: 'inside', // Wyśrodkowane etykiety wewnątrz wierzchołków
-          formatter: '{b}\n\n{c}' // {b} to nazwa wierzchołka, {c} to wartość (dodatkowy napis)
+          position: 'inside',
+          formatter: '{b}\n\n{c}'
         },
         edgeSymbol: ['circle', 'arrow'],
         edgeSymbolSize: [4, 10],
         data: data.nodes,
         links: data.links,
+        lineStyle:{
+          width:5
+        },
         emphasis: {
           focus: 'adjacency',
           lineStyle: {
@@ -73,13 +91,14 @@ export class TreeComponent implements OnInit, OnDestroy {
           }
         },
         force: {
-          repulsion: 300,
-          edgeLength: [100,400]
+          repulsion: 100, // Dostosowanie wartości repulsion (zmniejszenie odpychania)
+          gravity: 0.02,   // Zwiększenie wartości gravity (większe przyciąganie do centrum)
+          edgeLength: [70, 100], // Dostosowanie długości krawędzi (zmniejszenie odległości między wierzchołkami)
+          orient: 'LR' // Orientacja drzewa - Top to Bottom (góra na dole)
         }
       }]
     };
 
     this.chart.setOption(option, true);
   }
-
 }
