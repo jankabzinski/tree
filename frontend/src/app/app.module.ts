@@ -8,8 +8,6 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {HttpClientModule} from '@angular/common/http';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatTableModule} from '@angular/material/table';
-import {MatPaginatorModule} from '@angular/material/paginator';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {InplaceModule} from 'primeng/inplace';
 import { TreeComponent } from './tree/tree.component';
@@ -25,8 +23,6 @@ import {NgxGraphModule} from "@swimlane/ngx-graph";
     FormsModule,
     ReactiveFormsModule,
     DialogModule,
-    MatPaginatorModule,
-    MatTableModule,
     RouterModule,
     BrowserAnimationsModule,
     HttpClientModule,
