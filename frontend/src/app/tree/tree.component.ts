@@ -1,80 +1,85 @@
-// tree.component.ts
-import {Component} from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import * as echarts from 'echarts';
 
 @Component({
   selector: 'app-tree',
-  styleUrls: ['./tree.component.css'],
-  template: `
-    <ngx-graph
-        [links]="links"
-        [nodes]="nodes"
-      >
-
-        <ng-template #defsTemplate>
-          <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
-            <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
-          </svg:marker>
-        </ng-template>
-
-        <ng-template #clusterTemplate let-cluster>
-          <svg:g class="node cluster">
-            <svg:rect rx="5" ry="5" [attr.width]="cluster.dimension.width" [attr.height]="cluster.dimension.height" [attr.fill]="cluster.data.color" />
-          </svg:g>
-        </ng-template>
-
-        <ng-template #nodeTemplate let-node>
-          <svg:g class="node">
-            <svg:rect [attr.width]="node.dimension.width" [attr.height]="node.dimension.height" [attr.fill]="node.data.color" />
-            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">{{node.label}}</svg:text>
-          </svg:g>
-        </ng-template>
-
-        <ng-template #linkTemplate let-link>
-          <svg:g class="edge">
-            <svg:path class="line" stroke-width="2" marker-end="url(#arrow)">
-            </svg:path>
-            <svg:text class="edge-label" text-anchor="middle">
-              <textPath class="text-path" [attr.href]="'#' + link.id" [style.dominant-baseline]="link.dominantBaseline" startOffset="50%">
-                {{link.label}}
-              </textPath>
-            </svg:text>
-          </svg:g>
-        </ng-template>
-      </ngx-graph>`
+  templateUrl: './tree.component.html',
+  styleUrls: ['./tree.component.css']
 })
-export class TreeComponent {
-  nodes = [
-    {
-      id: 'first',
-      label: 'A'
-    }, {
-      id: 'second',
-      label: 'B'
-    }, {
-      id: 'c1',
-      label: 'C1'
-    }, {
-      id: 'c2',
-      label: 'C2'
-    }
-  ];
+export class TreeComponent implements OnInit, OnDestroy {
+  private chart: any;
 
-    links = [
-      {
-        id: 'a',
-        source: 'first',
-        target: 'second',
-        label: 'is parent of'
-      }, {
-        id: 'b',
-        source: 'first',
-        target: 'c1',
-        label: 'custom label'
-      }, {
-        id: 'c',
-        source: 'first',
-        target: 'c2',
-        label: 'custom label'
-      }
-    ];
+  constructor() { }
+
+  ngOnInit(): void {
+    this.initChart();
+    this.renderGraph();
+  }
+
+  ngOnDestroy(): void {
+    if (this.chart) {
+      this.chart.dispose();
+    }
+  }
+
+  initChart(): void {
+    const chartElement = document.getElementById('chart');
+    this.chart = echarts.init(chartElement);
+  }
+
+  renderGraph(): void {
+    const data = {
+      nodes: [
+        { name: 'Node 1', value: 'First Node' },
+        { name: 'Node 2', value: 'Second Node' },
+        { name: 'Node 3', value: 'Third Node' },
+        { name: 'Node 4', value: 'Fourth Node' },
+      ],
+      links: [
+        { source: 'Node 1', target: 'Node 2' },
+        { source: 'Node 1', target: 'Node 3' },
+        { source: 'Node 2', target: 'Node 3' },
+        { source: 'Node 2', target: 'Node 4' },
+        { source: 'Node 3', target: 'Node 4' },
+      ]
+    };
+
+    const option = {
+      title: {
+        text: 'Przykładowy graf ECharts - drzewo'
+      },
+      tooltip: {},
+      animationDurationUpdate: 1500,
+      animationEasingUpdate: 'quinticInOut',
+      series: [{
+        type: 'graph',
+        layout: 'force',
+        roam: true,
+        symbol: 'circle', // Kształt wierzchołka jako koło
+        symbolSize: 80, // Rozmiar wierzchołka
+        label: {
+          show: true,
+          position: 'inside', // Wyśrodkowane etykiety wewnątrz wierzchołków
+          formatter: '{b}\n\n{c}' // {b} to nazwa wierzchołka, {c} to wartość (dodatkowy napis)
+        },
+        edgeSymbol: ['circle', 'arrow'],
+        edgeSymbolSize: [4, 10],
+        data: data.nodes,
+        links: data.links,
+        emphasis: {
+          focus: 'adjacency',
+          lineStyle: {
+            width: 10
+          }
+        },
+        force: {
+          repulsion: 300,
+          edgeLength: [100,400]
+        }
+      }]
+    };
+
+    this.chart.setOption(option, true);
+  }
+
 }
