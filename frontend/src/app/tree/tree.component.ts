@@ -1,20 +1,21 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import * as echarts from 'echarts';
-import { NodeService } from '../services/node.service';
-import { Link } from '../models/link.model';
-import { Node } from '../models/node.model';
+import {NodeService} from "../services/node.service";
+import {Link} from "../models/link.model";
+import {Node} from "../models/node.model";
 
 @Component({
   selector: 'app-tree',
   templateUrl: './tree.component.html',
-  styleUrls: ['./tree.component.css'],
+  styleUrls: ['./tree.component.css']
 })
 export class TreeComponent implements OnInit, OnDestroy {
   private chart: any;
   private nodes: Node[] = [];
   private links: Link[] = [];
 
-  constructor(private nodeService: NodeService) {}
+  constructor(private nodeService: NodeService) {
+  }
 
   ngOnInit(): void {
     this.initChart();
@@ -49,8 +50,6 @@ export class TreeComponent implements OnInit, OnDestroy {
     const chartElement = document.getElementById('chart');
     this.chart = echarts.init(chartElement);
   }
-
-  // ... poprzedni kod ...
 
   renderGraph(): void {
     const treeData = [
@@ -119,13 +118,9 @@ export class TreeComponent implements OnInit, OnDestroy {
           emphasis: {
             focus: 'descendant', // Podświetlaj potomków w przypadku najechania na wierzchołek
           },
-        },
-      ],
+        }]
     };
 
     this.chart.setOption(option, true);
-
-
   }
-
 }

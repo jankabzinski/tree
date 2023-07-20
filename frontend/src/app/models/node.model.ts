@@ -3,5 +3,4 @@ export interface Node {
   parent_id: string | null;
   value: number;
   sum: number;
-  leaf: boolean;
 }
