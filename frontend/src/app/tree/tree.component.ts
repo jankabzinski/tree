@@ -1,9 +1,6 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import * as echarts from 'echarts';
 import {NodeService} from "../services/node.service";
-import {Link} from "../models/link.model";
 import {Node} from "../models/node.model";
-import {TreeNode} from 'primeng/api';
 
 @Component({
   selector: 'app-tree',
@@ -12,7 +9,8 @@ import {TreeNode} from 'primeng/api';
 })
 export class TreeComponent implements OnInit {
   nodes: Node[] = [];
-
+  editingNodeId: number | null = null;
+  editingNodeValue: number = -1;
 
   constructor(private nodeService: NodeService) {
   }
@@ -21,9 +19,22 @@ export class TreeComponent implements OnInit {
     this.getNodes();
   }
 
+  public addNode(parent_id: any) {
+
+    this.nodeService.addNode(parent_id).subscribe(() => {
+      this.getNodes()
+    });
+  }
+
   public getNodes() {
     this.nodeService.getNodes().subscribe((data) => {
-      this.nodes =  this.buildTree(data);
+      this.nodes = this.buildTree(data);
+    });
+  }
+
+  public deleteNode(node: Node) {
+    this.nodeService.deleteNode(node).subscribe(() => {
+      this.getNodes();
     });
   }
 
@@ -32,17 +43,15 @@ export class TreeComponent implements OnInit {
 
     // Tworzymy węzły z podanych danych i dodajemy pole "expanded" z wartością true
     for (const item of data) {
-      const { id, parent_id, ...rest } = item;
-      const node: Node = { id, parent_id, expanded: true, ...rest };
+      const {id, parent_id, ...rest} = item;
+      const node: Node = {id, parent_id, expanded: true, ...rest};
       node.children = [];
       nodeMap.set(id, node);
     }
 
     const rootNodes: Node[] = [];
-
-    // Tworzymy drzewo, łącząc rodziców z dziećmi
     for (const item of data) {
-      const { id, parent_id } = item;
+      const {id, parent_id} = item;
       const node = nodeMap.get(id);
 
       if (parent_id === null) {
@@ -56,5 +65,19 @@ export class TreeComponent implements OnInit {
     }
 
     return rootNodes;
+  }
+
+  editNode(node: Node) {
+    this.editingNodeId = node.id;
+    this.editingNodeValue = node.value;
+  }
+
+  saveNode(node: Node) {
+    node.value = this.editingNodeValue;
+    this.editingNodeId = null;
+    this.nodeService.updateNode(node).subscribe(() => {
+      this.getNodes()
+    });
+
   }
 }

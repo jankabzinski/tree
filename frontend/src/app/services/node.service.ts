@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Node} from "../models/node.model";
 import {Observable} from "rxjs/internal/Observable";
 
@@ -20,18 +20,26 @@ export class NodeService {
   }
 
   addNode(json: any) {
+    console.log(json)
     return this.http.post(
-      `${this.url}nodes`, json
+      `${this.url}nodes`, {"parent_id":json}
     );
   }
 
   public deleteNode(json: any) {
-    console.log(json)
+    const params = json.parent_id !== null ? json.parent_id : null;
     return this.http.delete(
-      `${this.url}nodes/` + json.id, json.id
+      `${this.url}nodes/` + json.id + '?parentId='+params
     )
   }
 
+  public updateNode(node:Node){
+      return this.http.put(`${this.url}nodes/`+node.id, {
+        "id":node.id,
+        "parent_id" : node.parent_id,
+        "value":node.value
+      })
+  }
 
 
 }

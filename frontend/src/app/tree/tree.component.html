@@ -2,10 +2,54 @@
   <p-tree [value]="nodes" class="w-full md:w-30rem" selectionMode="single">
     <ng-template pTemplate="default" let-node>
       <div class="node-content">
-        Value: {{ node.value }}  <span *ngIf="node.children.length===0">,   Sum: {{node.sum}}  </span>
-        <button pRipple pButton class="p-button-rounded p-button-warning"><i class="pi pi-plus "></i> &nbsp; Add Child</button>
-        <button pRipple pButton class="p-button-rounded" icon="pi pi-pencil">&nbsp; Edit</button>
-        <button  pRipple pButton class="p-button-rounded p-button-danger" *ngIf="node.parent_id !== null" ><i class="pi pi-times"></i>&nbsp; Delete</button>
+        <!-- Wyświetlamy pole Value jako edytowalne, jeśli edycja jest włączona dla tego węzła -->
+        <span *ngIf="editingNodeId === node.id">
+          Value:
+        <input  [(ngModel)]="editingNodeValue"/>
+</span>
+        <!-- Wyświetlamy zawartość pola Value jako tekst, jeśli edycja nie jest włączona -->
+        <span *ngIf="editingNodeId !== node.id">Value: {{ node.value }}</span>
+
+        <span *ngIf="node.children.length === 0">, Sum: {{ node.sum }}</span>
+        <button
+          pRipple
+          pButton
+          class="p-button-rounded p-button-warning"
+          (click)="addNode(node.id)"
+          *ngIf="editingNodeId !== node.id"
+        >
+          <i class="pi pi-plus"></i>&nbsp; Add Child
+        </button>
+        <button
+          pRipple
+          pButton
+          class="p-button-rounded"
+          icon="pi pi-pencil"
+          *ngIf="editingNodeId !== node.id"
+          (click)="editNode(node)"
+        >
+          &nbsp; Edit
+        </button>
+        <!-- Wyświetlamy przycisk Save, jeśli edycja jest włączona dla tego węzła -->
+        <button
+          pRipple
+          pButton
+          class="p-button-rounded"
+          *ngIf="editingNodeId === node.id"
+          (click)="saveNode(node)"
+          icon="pi pi-save"
+        >
+          &nbsp; Save
+        </button>
+        <button
+          pRipple
+          pButton
+          class="p-button-rounded p-button-danger"
+          *ngIf="node.parent_id !== null"
+          (click)="deleteNode(node)"
+        >
+          <i class="pi pi-times"></i>&nbsp; Delete
+        </button>
       </div>
     </ng-template>
   </p-tree>

@@ -1,13 +1,16 @@
 package com.example.node.controller;
+
 import com.example.node.entity.Node;
 import com.example.node.service.NodeService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @RestController
@@ -91,15 +94,17 @@ public class NodeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Node> updateNode(@RequestBody Node newNode,
-                                           @PathVariable Long id,
-                                           @RequestParam Optional<Integer> parent_sum) {
+                                           @PathVariable Long id) {
         //check if id in the path and in the body are the same, otherwise throw bad_request
         if (!Objects.equals(newNode.getId(), id) ||
                 service.getNodeById(newNode.getId()).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        //we pass newParentId only while not passing new node object, because object has already had this field
-        return new ResponseEntity<>(service.updateNodeById(Optional.of(newNode), id, parent_sum, Optional.empty()), HttpStatus.CREATED);
+
+        //take parent's sum, if parent_id is null -take 0
+
+        Integer parentSum = newNode.getParent_id() != null ? service.getNodeById(newNode.getParent_id()).get().getSum() : 0;
+        return new ResponseEntity<>(service.updateNodeById(Optional.of(newNode), id, Optional.of(parentSum), Optional.empty()), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
@@ -108,7 +113,7 @@ public class NodeController {
         if (nodeToDelete.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         //my idea is that we should not delete the root, because we could get more than one tree after destroying the links
-        if(parentId.isEmpty()){
+        if (parentId.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
