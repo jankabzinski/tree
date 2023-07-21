@@ -9,6 +9,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {InplaceModule} from 'primeng/inplace';
 import { TreeComponent } from './tree/tree.component';
+import {TreeModule} from "primeng/tree";
+import {RippleModule} from "primeng/ripple";
 
 @NgModule({
   declarations: [
@@ -25,6 +27,8 @@ import { TreeComponent } from './tree/tree.component';
     ButtonModule,
     BrowserModule,
     AppRoutingModule,
+    TreeModule,
+    RippleModule,
 
   ],
   providers: [],

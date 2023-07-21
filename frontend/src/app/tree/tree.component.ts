@@ -3,124 +3,58 @@ import * as echarts from 'echarts';
 import {NodeService} from "../services/node.service";
 import {Link} from "../models/link.model";
 import {Node} from "../models/node.model";
+import {TreeNode} from 'primeng/api';
 
 @Component({
   selector: 'app-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.css']
 })
-export class TreeComponent implements OnInit, OnDestroy {
-  private chart: any;
-  private nodes: Node[] = [];
-  private links: Link[] = [];
+export class TreeComponent implements OnInit {
+  nodes: Node[] = [];
+
 
   constructor(private nodeService: NodeService) {
   }
 
-  ngOnInit(): void {
-    this.initChart();
+  ngOnInit() {
+    this.getNodes();
+  }
 
-    this.nodeService.getNodes().subscribe((json: any) => {
-      // @ts-ignore
-      this.nodes = json.map((node) => ({
-        ...node,
-        parent_id: node.parent_id !== null ? node.parent_id.toString() : node.parent_id,
-        id: node.id.toString(),
-      }));
-      for (const node of this.nodes) {
-        if (node.parent_id !== null) {
-          const link: Link = {
-            source: node.parent_id,
-            target: node.id,
-          };
-          this.links.push(link);
-        }
-      }
-      this.renderGraph();
+  public getNodes() {
+    this.nodeService.getNodes().subscribe((data) => {
+      this.nodes =  this.buildTree(data);
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.chart) {
-      this.chart.dispose();
+  buildTree(data: any[]): Node[] {
+    const nodeMap = new Map<number, Node>();
+
+    // Tworzymy węzły z podanych danych i dodajemy pole "expanded" z wartością true
+    for (const item of data) {
+      const { id, parent_id, ...rest } = item;
+      const node: Node = { id, parent_id, expanded: true, ...rest };
+      node.children = [];
+      nodeMap.set(id, node);
     }
-  }
 
-  initChart(): void {
-    const chartElement = document.getElementById('chart');
-    this.chart = echarts.init(chartElement);
-  }
+    const rootNodes: Node[] = [];
 
-  renderGraph(): void {
-    const treeData = [
-      {
-        name: 'Wierzchołek 1',
-        value: 100,
-        children: [
-          {
-            name: 'Podwierzchołek 1.1',
-            value: 50,
-            children: [
-              {
-                name: 'Podwierzchołek 1.1.1',
-                value: 30,
-              },
-              {
-                name: 'Podwierzchołek 1.1.2',
-                value: 20,
-              },
-            ],
-          },
-          {
-            name: 'Podwierzchołek 1.2',
-            value: 70,
-          },
-        ],
-      },
-      {
-        name: 'Wierzchołek 2',
-        value: 200,
-        children: [
-          {
-            name: 'Podwierzchołek 2.1',
-            value: 80,
-          },
-          {
-            name: 'Podwierzchołek 2.2',
-            value: 120,
-          },
-        ],
-      },
-    ];
+    // Tworzymy drzewo, łącząc rodziców z dziećmi
+    for (const item of data) {
+      const { id, parent_id } = item;
+      const node = nodeMap.get(id);
 
+      if (parent_id === null) {
+        rootNodes.push(node!);
+      } else {
+        const parent = nodeMap.get(parent_id);
+        if (parent) {
+          parent.children!.push(node!);
+        }
+      }
+    }
 
-    const option = {
-      series: [
-        {
-          expandAndCollapse: false,
-          type: 'tree',
-          data: treeData,
-          top: '10%', // Ustaw odpowiednią pozycję wizualizacji na osi Y
-          left: '10%', // Ustaw odpowiednią pozycję wizualizacji na osi X
-          bottom: '10%', // Ustaw odpowiednią pozycję wizualizacji na osi Y
-          right: '10%', // Ustaw odpowiednią pozycję wizualizacji na osi X
-          symbol: 'circle', // Ustaw typ symbolu dla wierzchołków (np. 'circle')
-          symbolSize: 20, // Ustaw wielkość symbolu dla wierzchołków
-          label: {
-            show: true, // Pokaż etykiety wierzchołków
-            position: 'top', // Ustaw pozycję etykiety (np. 'top', 'inside')
-          },
-          leaves: {
-            label: {
-              position: 'bottom', // Ustaw pozycję etykiety dla liści (np. 'bottom', 'inside')
-            },
-          },
-          emphasis: {
-            focus: 'descendant', // Podświetlaj potomków w przypadku najechania na wierzchołek
-          },
-        }]
-    };
-
-    this.chart.setOption(option, true);
+    return rootNodes;
   }
 }

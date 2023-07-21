@@ -1,1 +1,12 @@
-<div id="chart" style="width: 100%; height: 100%; overflow: auto "></div>
+<div class="card flex justify-content-center">
+  <p-tree [value]="nodes" class="w-full md:w-30rem" selectionMode="single">
+    <ng-template pTemplate="default" let-node>
+      <div class="node-content">
+        Value: {{ node.value }}  <span *ngIf="node.children.length===0">,   Sum: {{node.sum}}  </span>
+        <button pRipple pButton class="p-button-rounded p-button-warning"><i class="pi pi-plus "></i> &nbsp; Add Child</button>
+        <button pRipple pButton class="p-button-rounded" icon="pi pi-pencil">&nbsp; Edit</button>
+        <button  pRipple pButton class="p-button-rounded p-button-danger" *ngIf="node.parent_id !== null" ><i class="pi pi-times"></i>&nbsp; Delete</button>
+      </div>
+    </ng-template>
+  </p-tree>
+</div>
