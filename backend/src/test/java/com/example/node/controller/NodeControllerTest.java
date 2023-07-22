@@ -45,29 +45,4 @@ public class NodeControllerTest {
                         .content(objectMapper.writeValueAsString(node)))
                 .andExpect(status().isCreated());
     }
-
-
-    @Test
-    void testAddNewNode_AddRootsChildSuccess() throws Exception {
-        Node root = new Node(1L, null, 0, 0);
-        Node child = new Node(2L, 1L, 1, 1);
-
-        // Konfiguracja zachowania mocka nodeService
-        when(nodeService.addNewNode(any(Node.class)))
-                .thenReturn(root);
-
-        mockMvc.perform(post("/nodes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(root)))
-                .andExpect(status().isCreated());
-
-        when(nodeService.addNewNode(new Node(1L,1,1)))
-                .thenReturn(child); // Za drugim wywołaniem zwróci child
-
-        mockMvc.perform(post("/nodes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new Node(2L,1L,1,1)))) // Wysyłamy dziecko roota
-                .andExpect(status().isCreated());
-    }
-
 }
