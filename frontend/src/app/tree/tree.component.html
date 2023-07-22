@@ -2,12 +2,10 @@
   <p-tree [value]="nodes" class="w-full md:w-30rem" selectionMode="single">
     <ng-template pTemplate="default" let-node>
       <div class="node-content">
-        <!-- Wyświetlamy pole Value jako edytowalne, jeśli edycja jest włączona dla tego węzła -->
         <span *ngIf="editingNodeId === node.id">
           Value:
         <input  [(ngModel)]="editingNodeValue"/>
 </span>
-        <!-- Wyświetlamy zawartość pola Value jako tekst, jeśli edycja nie jest włączona -->
         <span *ngIf="editingNodeId !== node.id">Value: {{ node.value }}</span>
 
         <span *ngIf="node.children.length === 0">, Sum: {{ node.sum }}</span>
@@ -30,17 +28,28 @@
         >
           &nbsp; Edit
         </button>
-        <!-- Wyświetlamy przycisk Save, jeśli edycja jest włączona dla tego węzła -->
         <button
           pRipple
           pButton
-          class="p-button-rounded"
+          class="p-button-rounded p-button-success"
           *ngIf="editingNodeId === node.id"
           (click)="saveNode(node)"
           icon="pi pi-save"
         >
           &nbsp; Save
         </button>
+
+        <button
+          pRipple
+          pButton
+          class="p-button-rounded p-button-secondary"
+          *ngIf="editingNodeId === node.id"
+          (click)="cancelChanges()"
+          icon="pi pi-undo"
+        >
+          &nbsp; Cancel
+        </button>
+
         <button
           pRipple
           pButton

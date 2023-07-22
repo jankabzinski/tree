@@ -1,16 +1,13 @@
 package com.example.node.controller;
-
 import com.example.node.entity.Node;
 import com.example.node.service.NodeService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @RestController
@@ -19,11 +16,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class NodeController {
 
     private final NodeService service;
-
     public NodeController(NodeService service) {
         this.service = service;
     }
-
     @GetMapping
     public ResponseEntity<Object> getAllNodes() {
         try {

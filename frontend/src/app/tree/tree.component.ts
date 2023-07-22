@@ -80,4 +80,8 @@ export class TreeComponent implements OnInit {
     });
 
   }
+
+  cancelChanges() {
+    this.editingNodeId=null;
+  }
 }
