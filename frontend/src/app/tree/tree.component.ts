@@ -38,6 +38,7 @@ export class TreeComponent implements OnInit {
     });
   }
 
+  //build tree from retrieved data by matching parent_id with id
   buildTree(data: any[]): Node[] {
     const nodeMap = new Map<number, Node>();
 

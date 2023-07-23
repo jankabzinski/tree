@@ -1,4 +1,5 @@
 package com.example.node.controller;
+
 import com.example.node.entity.Node;
 import com.example.node.service.NodeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +28,7 @@ public class NodeControllerTest {
     private NodeService nodeService;
 
     private MockMvc mockMvc;
-    private ObjectMapper objectMapper=new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     public void setup() {
@@ -36,7 +37,7 @@ public class NodeControllerTest {
 
     @Test
     void testAddNewNode_AddRootSuccess() throws Exception {
-        Node node = new Node(1L,null,0,0);
+        Node node = new Node(1L, null, 0, 0);
 
         when(nodeService.addNewNode(any(Node.class))).thenReturn(node);
 

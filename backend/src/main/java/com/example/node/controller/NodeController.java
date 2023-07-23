@@ -64,6 +64,11 @@ public class NodeController {
             requestNode.setSum(requestNode.getValue() + parentNode.getSum());
             Node newCreatedNode = service.addNewNode(requestNode);
 
+            //asParentForChildren was not implemented on fronted
+            //the idea is that instead of adding new node as leaf, we insert
+            //the node between parent node and its children
+            //before insert: A -> {B,C} after insert : A-> D -> {B,C}
+
             // if asParentForChildren was set to true
             // iterate through all parent's children, except for the new node and
             // change their parent to new node and recalculate sum
