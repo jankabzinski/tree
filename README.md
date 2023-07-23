@@ -15,7 +15,19 @@ Następnie uruchom funkcję main w klasie NodeApplication. Aplikacja będzie dzi
 
 
 3. Frontend: Angular CLI: 16.1.1, Node: 16.17.0
-instalacja Angular CLI:
-   npm install -g @angular/cli@16.1.1
 
-W terminalu wejdź do folderu frontend i wpisz komendę: ng serve. Aplikacja będzie działać pod adresem: localhost:4200/nodes
+instalacja Angular CLI:
+
+       npm install -g @angular/cli@16.1.1
+
+
+instalacja PrimeNG
+
+        npm install primeicons@6.0.1
+        npm install primeng@16.0.2
+
+
+W terminalu wejdź do folderu frontend i wpisz komendę:
+        
+        ng serve
+Aplikacja będzie działać pod adresem: localhost:4200/nodes
