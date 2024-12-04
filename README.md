@@ -14,7 +14,7 @@ Zmienne środowiskowe możesz również zahardkodować w application.properties 
 Następnie uruchom funkcję main w klasie NodeApplication. Aplikacja będzie działać pod adresem: localhost:8080/nodes
 
 
-3. Frontend: Angular CLI: 16.1.1, Node: 16.17.0
+3. Frontend: Angular CLI: 16.1.8, Node: 22.12.0
 
 instalacja Angular CLI:
 

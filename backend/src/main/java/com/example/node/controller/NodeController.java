@@ -23,109 +23,129 @@ public class NodeController {
     public ResponseEntity<Object> getAllNodes() {
         try {
             List<Node> nodes = this.service.getAllNodes();
-
             if (nodes.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            } else {
-                return new ResponseEntity<>(nodes, HttpStatus.OK);
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
+            return ResponseEntity.ok(nodes);
+
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getNode(@PathVariable Long id) {
-        var result = service.getNodeById(id);
-        if (result.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            return new ResponseEntity<>(result, HttpStatus.OK);
+    public ResponseEntity<Node> getNode(@PathVariable Long id) {
+        try {
+            Optional<Node> node = service.getNodeById(id);
+            return node.map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PostMapping()
     @Transactional
     public ResponseEntity<Node> addNewNode(@RequestBody Node requestNode, @RequestParam Optional<Boolean> asParentForChildren) {
-        //throw bad_request, when user is trying to add root, when tree already has a root
-        if (requestNode.getParent_id() == null && service.getRootId().isPresent())
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        try{
+            //throw bad_request, when user is trying to add root, when tree already has a root
+            if(requestNode.getParent_id() == null && service.getRootId().isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
 
 
-        if (requestNode.getParent_id() != null) {
-            //if parent_id is given (new node is not a root) retrieve parent node
-            Node parentNode = service.getNodeById(requestNode.getParent_id()).orElse(null);
+            if (requestNode.getParent_id() != null) {
+                //if parent_id is given (new node is not a root) retrieve parent node
+                Node parentNode = service.getNodeById(requestNode.getParent_id()).orElse(null);
 
-            //if parent_id is not in the base throw bad_request
-            if (parentNode == null)
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                //if parent_id is not in the base throw bad_request
+                if (parentNode == null)
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
-            //set sum to node's value plus parent's sum and add it to the db
-            requestNode.setSum(requestNode.getValue() + parentNode.getSum());
-            Node newCreatedNode = service.addNewNode(requestNode);
+                //set sum to node's value plus parent's sum and add it to the db
+                requestNode.setSum(requestNode.getValue() + parentNode.getSum());
+                Node newNode = service.addNewNode(requestNode);
 
-            //asParentForChildren was not implemented on fronted
-            //the idea is that instead of adding new node as leaf, we insert
-            //the node between parent node and its children
-            //before insert: A -> {B,C} after insert : A-> D -> {B,C}
+                // asParentForChildren was not implemented on fronted
+                // the idea is that instead of adding new node as leaf, we insert
+                // the node between parent node and its children
+                // before insert: A -> {B,C} after insert : A-> D -> {B,C}
 
-            // if asParentForChildren was set to true
-            // iterate through all parent's children, except for the new node and
-            // change their parent to new node and recalculate sum
+                // if asParentForChildren was set to true
+                // iterate through all parent's children, except for the new node and
+                // change their parent to new node and recalculate sum
 
-            if (asParentForChildren.isPresent() && asParentForChildren.get()) {
-                for (Long childId : service.getNodeChildrenById(requestNode.getParent_id())) {
-                    if (!Objects.equals(childId, newCreatedNode.getId())) {
-                        service.updateNodeById(Optional.empty(),
-                                childId,
-                                Optional.of(newCreatedNode.getSum()),
-                                Optional.of(newCreatedNode.getId()));
+                if (asParentForChildren.isPresent() && asParentForChildren.get()) {
+                    for (Long childId : service.getNodeChildrenById(requestNode.getParent_id())) {
+                        if (!Objects.equals(childId, newNode.getId())) {
+                            service.updateNodeById(Optional.empty(),
+                                    childId,
+                                    Optional.of(newNode.getSum()),
+                                    Optional.of(newNode.getId()));
+                        }
                     }
                 }
+                return ResponseEntity.status(HttpStatus.CREATED).body(newNode);
+            } else {
+                // if parent_id was not given then it is a root, so sum = value
+                requestNode.setSum(requestNode.getValue());
+                Node newNode = service.addNewNode(requestNode);
+                return ResponseEntity.status(HttpStatus.CREATED).body(newNode);
             }
-            return new ResponseEntity<>(newCreatedNode, HttpStatus.CREATED);
-        } else {
-            //parent_id was not given so it is a root, so sum = value
-            requestNode.setSum(requestNode.getValue());
-            Node newCreatedNode = service.addNewNode(requestNode);
-            return new ResponseEntity<>(newCreatedNode, HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Node> updateNode(@RequestBody Node newNode,
+    public ResponseEntity<Node> updateNode(@RequestBody Node updatedNode,
                                            @PathVariable Long id) {
-        //check if id in the path and in the body are the same, otherwise throw bad_request
-        if (!Objects.equals(newNode.getId(), id) ||
-                service.getNodeById(newNode.getId()).isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        try {
+            if (!Objects.equals(updatedNode.getId(), id)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
 
-        //take parent's sum, if parent_id is null -take 0
+            Optional<Node> existingNodeOpt = service.getNodeById(id);
+            if (existingNodeOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
 
-        Integer parentSum = newNode.getParent_id() != null ? service.getNodeById(newNode.getParent_id()).get().getSum() : 0;
-        return new ResponseEntity<>(service.updateNodeById(Optional.of(newNode), id, Optional.of(parentSum), Optional.empty()), HttpStatus.CREATED);
-    }
+            int parentSum = updatedNode.getParent_id() != null
+                    ? service.getNodeById(updatedNode.getParent_id()).map(Node::getSum).orElse(0)
+                    : 0;
+
+            Node updated = service.updateNodeById(Optional.of(updatedNode), id, Optional.of(parentSum), Optional.empty());
+            return ResponseEntity.status(HttpStatus.OK).body(updated);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteNodeById(@PathVariable Long id, @RequestParam Optional<Long> parentId) {
-        Optional<Node> nodeToDelete = service.getNodeById(id);
-        if (nodeToDelete.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        try {
+            Optional<Node> nodeOpt = service.getNodeById(id);
+            if (nodeOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            // for now, removing root is impossible
+            if (parentId.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            // reparent each 'orphan'
+            Node nodeToDelete = nodeOpt.get();
+            service.getNodeChildrenById(id).forEach(childId -> service.updateNodeById(Optional.empty(),
+                    childId,
+                    Optional.of(nodeToDelete.getSum() - nodeToDelete.getValue()),
+                    parentId));
 
-        //my idea is that we should not delete the root, because we could get more than one tree after destroying the links
-        if (parentId.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            service.deleteEmployeeById(id);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        //for each child change their parent, to deleted node's parent
-        //and recalculate sum, by omitting the value of deleted node
-        service.getNodeChildrenById(id).forEach(childId -> service.updateNodeById(Optional.empty(),
-                childId,
-                Optional.of(nodeToDelete.get().getSum() - nodeToDelete.get().getValue()),
-                parentId));
-
-
-        service.deleteEmployeeById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
